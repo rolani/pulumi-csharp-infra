@@ -4,16 +4,16 @@ description: A Pulumi YAML program to deploy a Kubernetes cluster on AWS
 config:
   desiredClusterSize:
     type: integer
-    default: 1
+    default: 2
   eksNodeInstanceType:
     type: string
     default: t3.medium
   maxClusterSize:
     type: integer
-    default: 2
+    default: 3
   minClusterSize:
     type: integer
-    default: 1
+    default: 2
   vpcNetworkCidr:
     type: string
     default: 10.0.0.0/16
