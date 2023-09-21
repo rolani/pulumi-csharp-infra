@@ -1,178 +1,19 @@
 name: infra-team-solution
-runtime: yaml
+runtime: python
 description: A Pulumi YAML program to deploy a Kubernetes cluster on AWS
 config:
   desiredClusterSize:
     type: integer
-    default: 2
+    default: 1
   eksNodeInstanceType:
     type: string
     default: t3.medium
   maxClusterSize:
     type: integer
-    default: 3
+    default: 2
   minClusterSize:
     type: integer
-    default: 2
+    default: 1
   vpcNetworkCidr:
     type: string
     default: 10.0.0.0/16
-variables:
-  appLabels:
-    app: ui-app
-  apiLabels:
-    app: api-app
-outputs:
-  # output the lb url with port for the web ui
-  ui-url: "http://${web-service.status.loadBalancer.ingress[0].hostname}/"
-resources:
-  # Create the EKS cluster
-  eks-cluster:
-    properties:
-      desiredCapacity: ${desiredClusterSize}
-      # Change configuration section above to change any of the following settings
-      instanceType: ${eksNodeInstanceType}
-      maxSize: ${maxClusterSize}
-      minSize: ${minClusterSize}
-      name: infra-team-test-cluster
-      # Do not give the worker nodes public IP addresses
-      nodeAssociatePublicIpAddress: false
-      # Private subnets will be used for cluster nodes
-      privateSubnetIds: ${eks-vpc.privateSubnetIds}
-      # Public subnets will be used for load balancers
-      publicSubnetIds: ${eks-vpc.publicSubnetIds}
-      # Put the cluster in the new VPC created earlier
-      vpcId: ${eks-vpc.vpcId}
-      tags:
-        project: infra-team-test
-        owner: richard
-    type: eks:Cluster
-  # Create a VPC for the EKS cluster
-  eks-vpc:
-    properties:
-      cidrBlock: ${vpcNetworkCidr}
-      enableDnsHostnames: true
-      tags:
-        project: infra-team-test
-        owner: richard
-    type: awsx:ec2:Vpc
-  # eks-provider config
-  eks-provider:
-    type: pulumi:providers:kubernetes
-    properties:
-      kubeconfig: ${eks-cluster.kubeconfigJson}
-  # An ECR repository to store the web ui container image
-  ui-repository:
-    type: awsx:ecr:Repository
-    properties:
-      name: web-ui
-      tags:
-        project: infra-team-test
-        owner: richard
-  # Build and publish web ui container image to the ECR repository
-  ui-image:
-    type: awsx:ecr:Image
-    properties:
-      repositoryUrl: ${ui-repository.url}
-      path: ./infra-web
-  # Build and push web api docker image to ecr
-  api-repository:
-    type: awsx:ecr:Repository
-    properties:
-      name: api-repo
-      tags:
-        project: infra-team-test
-        owner: richard
-  api-image:
-    type: awsx:ecr:Image
-    properties:
-      repositoryUrl: ${api-repository.url}
-      path: ./infra-api
-  # eks namespace for deployments    
-  infra-ns:
-    type: kubernetes:core/v1:Namespace
-    options:
-      provider: ${eks-provider}
-  # web ui deployment
-  ui-deployment:
-    type: kubernetes:apps/v1:Deployment
-    properties:
-      metadata:
-        name: web-ui
-        namespace: ${infra-ns.metadata.name}
-      spec:
-        selector:
-          matchLabels: ${appLabels}
-        replicas: 1
-        template:
-          metadata:
-            labels: ${appLabels}
-          spec:
-            containers:
-              - name: web-ui
-                image: ${ui-image.imageUri}
-                ports:
-                  - name: ui
-                    containerPort: 5000
-                env:
-                  - name: ApiAddress
-                    value: "http://api-service.${infra-ns.metadata.name}.svc.cluster.local:5000/WeatherForecast"
-    options:
-      provider: ${eks-provider}
-  # web ui lb service              
-  web-service:
-    type: kubernetes:core/v1:Service
-    properties:
-      metadata:
-        name: web-service
-        namespace: ${infra-ns.metadata.name}
-        labels: ${appLabels}
-      spec:
-        type: LoadBalancer
-        selector: ${appLabels}
-        ports:
-          - port: 80
-            targetPort: 5000
-            protocol: TCP
-    options:
-      provider: ${eks-provider}
-  # web api deployment
-  api-deployment:
-    type: kubernetes:apps/v1:Deployment
-    properties:
-      metadata:
-        name: web-api
-        namespace: ${infra-ns.metadata.name}
-      spec:
-        selector:
-          matchLabels: ${apiLabels}
-        replicas: 1
-        template:
-          metadata:
-            labels: ${apiLabels}
-          spec:
-            containers:
-              - name: web-api
-                image: ${api-image.imageUri}
-                ports:
-                  - name: api
-                    containerPort: 5000
-    options:
-      provider: ${eks-provider}
-  # web api clusterIP service              
-  api-service:
-    type: kubernetes:core/v1:Service
-    properties:
-      metadata:
-        name: api-service
-        namespace: ${infra-ns.metadata.name}
-        labels: ${apiLabels}
-      spec:
-        type: ClusterIP
-        selector: ${apiLabels}
-        ports:
-          - port: 5000
-            targetPort: 5000
-            protocol: TCP
-    options:
-      provider: ${eks-provider}

@@ -1,7 +1,3 @@
-# Setup
-
-Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begin/), [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html) installed and configured on your machine.
-
 Clone this git repository and change to the directory
 ```
 git clone https://github.com/rolani/infra-team-test.git
@@ -14,8 +10,11 @@ Deploy the infrastructure and applications to AWS EKS using pulumi
 ```
 make deploy
 ```
+This will install all the Python dependencies needed and deploy the AWS resources defined.
+
 Alternatively run:
 ```
+pip install -r requirements.txt
 pulumi up -s production --yes
 ```
 The above command will output the load-balancer url for the web ui that entered in a browser.
