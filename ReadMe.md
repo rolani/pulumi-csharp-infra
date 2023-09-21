@@ -34,7 +34,9 @@ The above command will output the load-balancer url for the web ui that entered 
 - The UI is likewise deployed on a node in a private subnet on the EKS cluster.
 - The UI is exposed to the public internet through a `LoadBalancer` service
 
+The infrastructure diagram is shown below
 
+ ![architecture diagram](/diagram/intra-team-test.png)
 
 # Cleanup
 
