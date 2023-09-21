@@ -3,6 +3,7 @@ import pulumi_awsx as awsx
 import pulumi_eks as eks
 import pulumi_kubernetes as kubernetes
 
+# get config input
 config = pulumi.Config()
 desired_cluster_size = config.get_int("desiredClusterSize")
 if desired_cluster_size is None:
@@ -19,12 +20,16 @@ if min_cluster_size is None:
 vpc_network_cidr = config.get("vpcNetworkCidr")
 if vpc_network_cidr is None:
     vpc_network_cidr = "10.0.0.0/16"
+
+# define variables
 app_labels = {
     "app": "ui-app",
 }
 api_labels = {
     "app": "api-app",
 }
+
+# eks-vpc definition
 eks_vpc = awsx.ec2.Vpc("eks-vpc",
     cidr_block=vpc_network_cidr,
     enable_dns_hostnames=True,
@@ -32,6 +37,8 @@ eks_vpc = awsx.ec2.Vpc("eks-vpc",
         "project": "infra-team-test",
         "owner": "richard",
     })
+
+# eks cluster definition
 eks_cluster = eks.Cluster("eks-cluster",
     desired_capacity=desired_cluster_size,
     instance_type=eks_node_instance_type,
@@ -46,26 +53,40 @@ eks_cluster = eks.Cluster("eks-cluster",
         "project": "infra-team-test",
         "owner": "richard",
     })
+
+# eks-provider definition to point to the created eks cluster
 eks_provider = kubernetes.Provider("eks-provider", kubeconfig=eks_cluster.kubeconfig_json)
+
+# define ecr repo to hold web ui image
 ui_repository = awsx.ecr.Repository("ui-repository",
     name="web-ui",
     tags={
         "project": "infra-team-test",
         "owner": "richard",
     })
+
+# build and push image to ecr repo
 ui_image = awsx.ecr.Image("ui-image",
     repository_url=ui_repository.url,
     path="./infra-web")
+
+# define ecr repo to hold web api image
 api_repository = awsx.ecr.Repository("api-repository",
     name="api-repo",
     tags={
         "project": "infra-team-test",
         "owner": "richard",
     })
+
+# build and push image to ecr repo
 api_image = awsx.ecr.Image("api-image",
     repository_url=api_repository.url,
     path="./infra-api")
+
+# define eks cluster namespace to deploy the applications artifacts
 infra_ns = kubernetes.core.v1.Namespace("infra-ns", opts=pulumi.ResourceOptions(provider=eks_provider))
+
+# define the web ui application deployment
 ui_deployment = kubernetes.apps.v1.Deployment("ui-deployment",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name="web-ui",
@@ -97,6 +118,8 @@ ui_deployment = kubernetes.apps.v1.Deployment("ui-deployment",
         ),
     ),
     opts=pulumi.ResourceOptions(provider=eks_provider))
+
+# define the LoadBalancer service for web ui
 web_service = kubernetes.core.v1.Service("web-service",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name="web-service",
@@ -113,6 +136,8 @@ web_service = kubernetes.core.v1.Service("web-service",
         )],
     ),
     opts=pulumi.ResourceOptions(provider=eks_provider))
+
+# define the web api application deployment
 api_deployment = kubernetes.apps.v1.Deployment("api-deployment",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name="web-api",
@@ -140,6 +165,8 @@ api_deployment = kubernetes.apps.v1.Deployment("api-deployment",
         ),
     ),
     opts=pulumi.ResourceOptions(provider=eks_provider))
+
+# define the clusterIP service for web api
 api_service = kubernetes.core.v1.Service("api-service",
     metadata=kubernetes.meta.v1.ObjectMetaArgs(
         name="api-service",
@@ -156,4 +183,6 @@ api_service = kubernetes.core.v1.Service("api-service",
         )],
     ),
     opts=pulumi.ResourceOptions(provider=eks_provider))
+
+# return the url of the load balancer pointing to the web ui application
 pulumi.export("ui-url", web_service.status.load_balancer.ingress[0].hostname)
