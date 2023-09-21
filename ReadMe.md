@@ -1,10 +1,10 @@
+# How to run
+
 Clone this git repository and change to the directory
 ```
 git clone https://github.com/rolani/infra-team-test.git
 cd infra-team-test
 ```
-
-# How to run
 
 Deploy the infrastructure and applications to AWS EKS using pulumi
 ```
