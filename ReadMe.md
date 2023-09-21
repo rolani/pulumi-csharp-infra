@@ -4,11 +4,6 @@ Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begi
 
 Clone this git repository and change to the directory
 ```
-make setup
-```
-
-Aternatively run:
-```
 git clone https://github.com/rolani/infra-team-test.git
 cd infra-team-test
 ```
