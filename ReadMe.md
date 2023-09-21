@@ -2,16 +2,19 @@
 
 Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begin/), [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html) configured on your machine.
 
-Clone this git repository 
+Clone this git repository and change to the directory
+```
+make setup
+```
+
+Aternatively run:
 ```
 git clone https://github.com/rolani/infra-team-test.git
+cd infra-team-test
 ```
 
 # How to run
-Change current directory to the cloned repo
-```
-cd infra-team-test
-```
+
 Deploy the infrastructure and applications to AWS EKS using pulumi
 ```
 make deploy
