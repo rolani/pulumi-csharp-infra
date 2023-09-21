@@ -45,4 +45,5 @@ make destroy
 Alternatively run:
 ```
 pulumi destroy -s production --yes
+pulumi stack rm production 
 ```
