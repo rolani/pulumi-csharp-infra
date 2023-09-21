@@ -131,8 +131,8 @@ resources:
         type: LoadBalancer
         selector: ${appLabels}
         ports:
-          - port: 5000
-            targetPort: 80
+          - port: 80
+            targetPort: 5000
             protocol: TCP
     options:
       provider: ${eks-provider}
