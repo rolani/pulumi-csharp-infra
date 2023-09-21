@@ -23,10 +23,8 @@ variables:
   apiLabels:
     app: api-app
 outputs:
-  # Output the Kubeconfig for the cluster
-  kubeconfig: ${eks-cluster.kubeconfig}
-  vpcId: ${eks-vpc.vpcId}
-  ui-url: ${web-service.status.loadBalancer.ingress[0].hostname}
+  # output the lb url with port for the web ui
+  ui-url: "http://${web-service.status.loadBalancer.ingress[0].hostname}/"
 resources:
   # Create the EKS cluster
   eks-cluster:
@@ -134,7 +132,7 @@ resources:
         selector: ${appLabels}
         ports:
           - port: 5000
-            targetPort: 5000
+            targetPort: 80
             protocol: TCP
     options:
       provider: ${eks-provider}

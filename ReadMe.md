@@ -1,22 +1,48 @@
-# How to Run
+# Setup
 
-install docker on your machine: [Install Docker](https://docs.docker.com/engine/install/)
+Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begin/), [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html) configured on your machine.
 
-
-Open terminal and run:
+Clone this git repository 
 ```
-docker-compose up
-```
-
-Open a web browser and navigate to 
-```
-http://localhost:3000
+git clone https://github.com/rolani/infra-team-test.git
 ```
 
+# How to run
+Change current directory to the cloned repo
+```
+cd infra-team-test
+```
+Deploy the infrastructure and applications to AWS EKS using pulumi
+```
+make deploy
+```
+Alternatively run:
+```
+pulumi up -s production --yes
+```
+The above command will output the load-balancer url for the web ui that entered in a browser.
 
 # Application Details
 
-- Web: ASP.NET Core 5.0 Web APP
-  - this application requires an environment variabled called "ApiAddress" which will be the address of the Web Api.
-- API: ASP.NET Core 5.0 Web API
+- All resources deployed on AWS have the following tags
 
+  `project: infra-team-test`
+
+  `owner: richard`
+- The web API is deployed as a deployment on the EKS cluster on a node in a private subnet. 
+- The web API service uses a `ClusterIP` and thus it cannot be accessed from outside the cluster.
+- The UI is likewise deployed on a node in a private subnet on the EKS cluster.
+- The UI is exposed to the public internet through a `LoadBalancer` service
+
+
+
+# Cleanup
+
+Run the following command to clean up/destroy all the created resources:
+```
+make destroy
+```
+Alternatively run:
+```
+pulumi destroy -s production --yes
+```
