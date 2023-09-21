@@ -11,10 +11,10 @@ USER appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0-focal AS build
 WORKDIR /src
-COPY ["infra-api/infra-api.csproj", "infra-api/"]
+COPY ["infra-api.csproj", "infra-api/"]
 RUN dotnet restore "infra-api/infra-api.csproj"
+WORKDIR /src/infra-api
 COPY . .
-WORKDIR "/src/infra-api"
 RUN dotnet build "infra-api.csproj" -c Release -o /app/build
 
 FROM build AS publish
