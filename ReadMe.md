@@ -1,6 +1,6 @@
 # Setup
 
-Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begin/), [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html) configured on your machine.
+Ensure you have [pulumi](https://www.pulumi.com/docs/clouds/aws/get-started/begin/), [awscli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [kubectl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html) installed and configured on your machine.
 
 Clone this git repository and change to the directory
 ```
