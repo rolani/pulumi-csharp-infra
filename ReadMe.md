@@ -2,7 +2,7 @@
 
 Clone this git repository and change to the directory
 ```
-git clone https://github.com/rolani/infra-team-test.git
+git clone -b python https://github.com/rolani/infra-team-test.git
 cd infra-team-test
 ```
 
